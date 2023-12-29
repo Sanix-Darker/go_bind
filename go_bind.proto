@@ -1,0 +1,9 @@
+syntax = "proto3";
+option go_package = "./";
+
+package go_bind;
+
+message Pack {
+    string data = 1;
+    int32 len = 2;
+}

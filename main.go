@@ -5,39 +5,48 @@ package main
 #define Py_LIMITED_API
 #include <Python.h>
 
-typedef struct {
-    int xxx;
-    char yyy[100];
-} GoBindStruct;
-
 */
 import "C"
+
 import (
 	"fmt"
 	"unsafe"
+
+	"github.com/golang/protobuf/proto"
 )
 
-type GoBindStruct struct {
-	xxx C.int
-	yyy *C.char
-}
+//export GetDataInfo
+func GetDataInfo(pb *C.char) *C.char {
+	// Convert C string to Go byte slice
+	bytes := C.GoBytes(
+		unsafe.Pointer(pb),
+		C.int(C.strlen(pb)),
+	)
+	data := &Pack{}
 
-//export PrintThis
-func PrintThis(a C.int, b *C.char) C.int {
-	aa := GoBindStruct{
-		a, b,
+	// Unmarshal the protobuf data
+	err := proto.Unmarshal(bytes, data)
+	if err != nil {
+		fmt.Printf("Error unmarshaling protobuf: %v", err)
+		return nil
 	}
-	fmt.Printf("> input :: %d\n", aa.xxx)
-	fmt.Printf("< output :: %s\n", C.GoString(aa.yyy))
-	// aa.xxx = aa.xxx + C.int(unsafe.Sizeof(aa.yyy))
-	aa.xxx = aa.xxx + C.int(len(C.GoString(aa.yyy)))
 
-	return aa.xxx
+	// Print information about the data
+	fmt.Printf("Data: %s, Length: %d\n", data.GetData(), data.GetLen())
+
+	// Manipulate the data
+	data.Data = "Hi from GO, your input was '" + data.GetData() + "'"
+	data.Len = int32(len(data.GetData()))
+
+	// Marshal the modified protobuf data
+	modifiedBytes, err := proto.Marshal(data)
+	if err != nil {
+		fmt.Printf("Error marshaling protobuf: %v", err)
+		return nil
+	}
+
+	// Convert Go byte slice to C string
+	return C.CString(string(modifiedBytes))
 }
 
-func main() {
-	var strr *C.char = C.CString("dk")
-	defer C.free(unsafe.Pointer(strr))
-
-	PrintThis(1, strr)
-}
+func main() {}
