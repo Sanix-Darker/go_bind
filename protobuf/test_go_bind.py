@@ -1,8 +1,11 @@
 from ctypes import c_char_p, CDLL
+import pathlib
 from go_bind_pb2 import Pack as PackMessage
 
 # Load the shared library
-lib = CDLL('./go_bind.so')
+libpath = pathlib.Path().absolute() / "go_bind.so"
+lib = CDLL(str(libpath))
+
 get_data_info = lib.GetDataInfo
 get_data_info.argtypes = [c_char_p]
 get_data_info.restype = c_char_p

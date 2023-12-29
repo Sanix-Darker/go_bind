@@ -1,11 +1,13 @@
+import pathlib
 from cffi import FFI
 ffibuilder = FFI()
 
+libpath = pathlib.Path().absolute() / "go_bind.so"
 ffibuilder.set_source("go_bind_py",
     """ //passed to the real C compiler
         #include "go_bind.h"
     """,
-    extra_objects=["go_bind.so"])
+    extra_objects=[libpath])
 
 ffibuilder.cdef("""
     typedef struct {
