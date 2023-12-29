@@ -1,5 +1,3 @@
-BASE=$(shell basename "$(shell pwd)")
-
 install-py: ## install python libs/deps
 	pip install -r requirements.txt
 
@@ -12,12 +10,12 @@ proto: install-py install-go ## build the .proto
 	python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. go_bind.proto
 
 build-so: proto ## build the .so shared lib
-	rm -rf ${BASE}.so go_bind_py.c go_bind_py.o go_bind_py.so
-	@echo "> Building ${BASE}..."
+	rm -rf go_bind.so go_bind_py.c go_bind_py.o go_bind_py.so
+	@echo "> Building go_bind..."
 	sed -i 's/package __/package main/g' ./go_bind.pb.go
-	go build -buildmode=c-shared -o ${BASE}.so .
-	@echo "> List exported funcs from ${BASE}..."
-	nm -gC ${BASE}.so
+	go build -buildmode=c-shared -o go_bind.so .
+	@echo "> List exported funcs from go_bind..."
+	nm -gC go_bind.so
 
 run: build-so ## run the test python code
 	python3 ./test_go_bind.py

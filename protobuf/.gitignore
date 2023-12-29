@@ -1,0 +1,7 @@
+env
+*.so
+*.h
+*.c
+*.pb*
+*_pb*
+*__pycache__
